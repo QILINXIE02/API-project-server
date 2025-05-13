@@ -1,3 +1,4 @@
+// server.js
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
@@ -10,7 +11,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.use('/api/music', musicRoutes);
+app.use('/api/music', musicRoutes); // Ensure this is correctly defined
 app.use('/api/weather', weatherRoutes);
 
 const PORT = process.env.PORT || 3001;

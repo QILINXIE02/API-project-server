@@ -1,45 +1,22 @@
-import axios from 'axios';
+// routes/musicRoutes.js
+import express from 'express';
+const router = express.Router();
 
-export const getMoodMusic = async (req, res) => {
-  const { mood } = req.params;
-  try {
-    const response = await axios.get('https://api.jamendo.com/v3.0/tracks', {
-      params: {
-        client_id: process.env.JAMENDO_API_KEY,
-        tags: mood,
-        format: 'json',
-        limit: 10,
-      },
-    });
-    res.json(response.data.results);
-  } catch (err) {
-    res.status(500).json({ message: err.message });
+router.get('/', async (req, res) => {
+  const { mood, city } = req.query;
+
+  // Check if the mood and city are provided in the request
+  if (!mood || !city) {
+    return res.status(400).json({ error: 'Mood and city are required' });
   }
-};
 
-export const getCityArtists = async (req, res) => {
-  const { city } = req.params;
-  try {
-    const locationRes = await axios.get('https://eu1.locationiq.com/v1/search.php', {
-      params: {
-        key: process.env.LOCATION_API_KEY,
-        q: city,
-        format: 'json',
-      },
-    });
+  // Simulate music data based on the mood and city
+  const musicData = [
+    { title: `Romantic Song 1 in ${city}`, artist: 'Artist A' },
+    { title: `Romantic Song 2 in ${city}`, artist: 'Artist B' },
+  ];
 
-    const { lat, lon } = locationRes.data[0];
+  return res.json(musicData);
+});
 
-    const weatherRes = await axios.get('https://api.weatherbit.io/v2.0/current', {
-      params: {
-        key: process.env.WEATHER_API_KEY,
-        lat,
-        lon,
-      },
-    });
-
-    res.json({ weather: weatherRes.data.data[0], location: { lat, lon } });
-  } catch (err) {
-    res.status(500).json({ message: err.message });
-  }
-};
+export default router;
