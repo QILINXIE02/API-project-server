@@ -1,22 +1,27 @@
-// routes/musicRoutes.js
-import express from 'express';
-const router = express.Router();
+import axios from 'axios';
 
-router.get('/', async (req, res) => {
+export const getMusic = async (req, res) => {
   const { mood, city } = req.query;
 
-  // Check if the mood and city are provided in the request
   if (!mood || !city) {
     return res.status(400).json({ error: 'Mood and city are required' });
   }
 
-  // Simulate music data based on the mood and city
-  const musicData = [
-    { title: `Romantic Song 1 in ${city}`, artist: 'Artist A' },
-    { title: `Romantic Song 2 in ${city}`, artist: 'Artist B' },
-  ];
+  try {
+    const response = await axios.get('http://ws.audioscrobbler.com/2.0/', {
+      params: {
+        method: 'tag.gettoptracks',
+        tag: mood,
+        api_key: process.env.LASTFM_API_KEY,
+        format: 'json',
+        limit: 10,
+      },
+    });
 
-  return res.json(musicData);
-});
-
-export default router;
+    const tracks = response.data.tracks?.track || [];
+    res.json(tracks);
+  } catch (error) {
+    console.error('Music fetch error:', error.message);
+    res.status(500).json({ error: 'Failed to fetch music' });
+  }
+};
