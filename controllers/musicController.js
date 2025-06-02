@@ -8,20 +8,26 @@ export const getMusic = async (req, res) => {
   }
 
   try {
-    const response = await axios.get('http://ws.audioscrobbler.com/2.0/', {
+    const response = await axios.get('https://api.jamendo.com/v3.0/tracks', {
       params: {
-        method: 'tag.gettoptracks',
-        tag: mood,
-        api_key: process.env.LASTFM_API_KEY,
+        client_id: process.env.JAMENDO_API_KEY,
+        tags: mood,
         format: 'json',
-        limit: 10,
+        limit: 5,
       },
     });
 
-    const tracks = response.data.tracks?.track || [];
+    const tracks = response.data.results.map((track) => ({
+      id: track.id,
+      name: track.name,
+      artist_name: track.artist_name,
+      audio: track.audio,
+      playLink: `https://www.youtube.com/results?search_query=${encodeURIComponent(track.name + ' ' + track.artist_name)}`
+    }));
+
     res.json(tracks);
-  } catch (error) {
-    console.error('Music fetch error:', error.message);
+  } catch (err) {
+    console.error('Jamendo API error:', err.message);
     res.status(500).json({ error: 'Failed to fetch music' });
   }
 };
